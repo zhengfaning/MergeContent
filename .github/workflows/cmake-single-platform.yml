@@ -14,4 +14,4 @@ jobs:
     - name: Run CMake
       run: cmake . -Bbuild
     - name: Build
-      run: cmake --build build
+      run: cmake -B build -S src

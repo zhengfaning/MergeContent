@@ -1,4 +1,4 @@
-name: C++ CI
+name: C++ CI with Qt
 
 on: [push]
 
@@ -9,8 +9,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install Qt5
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '5.15.2' # 选择你需要的Qt版本
+        modules: 'qtbase' # qtbase通常包含Core和Widgets
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y cmake g++
+      run: sudo apt-get update && sudo apt-get install -y build-essential
     - name: Run CMake
       run: cmake ./src -Bbuild
     - name: Build

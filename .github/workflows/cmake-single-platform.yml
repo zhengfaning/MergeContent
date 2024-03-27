@@ -1,0 +1,17 @@
+name: C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y cmake g++
+    - name: Run CMake
+      run: cmake . -Bbuild
+    - name: Build
+      run: cmake --build build

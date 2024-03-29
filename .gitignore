@@ -1,0 +1,7 @@
+src/.vs/
+src/out/
+build*
+.vs/
+src/CMakeLists.txt.user
+src/CMakePresets.json
+src/CMakeUserPresets.json

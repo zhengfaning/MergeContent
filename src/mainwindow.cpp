@@ -2,11 +2,15 @@
 #include "fontawesomeicons.h"
 
 
+
+
+
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/) : QMainWindow(parent)
 {
 	setWindowTitle("Merge Content");
 	setGeometry(100, 100, 1280, 720);
-
+	// Create QSettings object
+	settings = new QSettings("beyond", "Merge Content", this);
 	// Create file system model
 	model = new QFileSystemModel(this);
 	model->setRootPath(QDir::homePath());
@@ -20,6 +24,8 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) : QMainWindow(parent)
 	treeView->setSelectionMode(QAbstractItemView::ExtendedSelection); // Multi-select mode
 	treeView->setColumnWidth(0, 300); // Set Name column width
 	connect(treeView, &QTreeView::clicked, this, &MainWindow::onTreeViewClicked);
+
+	
 
 	// Create drive selector
 	driveSelector = new QComboBox(this);
@@ -125,8 +131,8 @@ MainWindow::MainWindow(QWidget* parent /*= nullptr*/) : QMainWindow(parent)
 	centralWidget->setLayout(mainLayout);
 	setCentralWidget(centralWidget);
 
-	// Create QSettings object
-	settings = new QSettings("beyond", "Merge Content", this);
+
+	setupFavoritesMenu();
 
 	// Load saved settings
 	loadSettings();
@@ -148,6 +154,60 @@ void MainWindow::updateNameFilters()
 	// Save extensions setting
 	settings->setValue("extensions", extensionInput->text());
 }
+
+
+void MainWindow::setupFavoritesMenu()
+{
+	favoritesMenu = menuBar()->addMenu(tr("&Favorites"));
+
+	QAction* addToFavoritesAction = new QAction(tr("Add To Favorites"), this);
+	connect(addToFavoritesAction, &QAction::triggered, this, &MainWindow::addToFavorites);
+	favoritesMenu->addAction(addToFavoritesAction);
+
+	favoritesMenu->addSeparator();
+
+	// 动态加载收藏夹
+	//updateFavoritesMenu();
+}
+
+void MainWindow::addToFavorites()
+{
+	QString currentPath = pathInput->text();
+	QVariantList favorites = settings->value("favorites").toList();
+	if (!favorites.contains(currentPath)) {
+		favorites.append(currentPath);
+		settings->setValue("favorites", favorites);
+		updateFavoritesMenu(); // 更新菜单
+	}
+}
+
+void MainWindow::updateFavoritesMenu()
+{
+
+
+	// 清除现有的动作，除了"添加到收藏夹"和分隔符
+	favoritesMenu->clear();
+
+	QAction* addToFavoritesAction = new QAction(tr("Add To Favorites"), this);
+	connect(addToFavoritesAction, &QAction::triggered, this, &MainWindow::addToFavorites);
+	favoritesMenu->addAction(addToFavoritesAction);
+
+	favoritesMenu->addSeparator();
+
+	// 重新加载收藏夹
+	QVariant storedFavorites = settings->value("favorites");
+
+	QVariantList favorites = storedFavorites.isValid() ? storedFavorites.toList() : QVariantList();
+	for (const QVariant& favorite : favorites) {
+        QAction* action = new QAction(favorite.toString(), this);
+        connect(action, &QAction::triggered, this, [=]() {
+            pathInput->setText(favorite.toString());
+            onUpdateRootPath(); // 更新根路径
+            });
+        favoritesMenu->addAction(action);
+    }
+}
+
 
 void MainWindow::onTreeViewClicked(const QModelIndex& index)
 {
@@ -343,4 +403,6 @@ void MainWindow::loadSettings()
 		nameFilters << QString("*.").append(ext);
 	}
 	model->setNameFilters(nameFilters);
+
+	updateFavoritesMenu();
 }

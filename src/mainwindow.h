@@ -20,8 +20,11 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStorageInfo>
-//#include <QChardet>
 #include <QDebug>
+#include <QMenuBar>
+#include <QAction>
+#include <QSettings>
+#include <QMessageBox>
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -81,8 +84,14 @@ private slots:
         updateMerge();
         clipboard->setText(mergedContent);
     }
-
+    
     void updateMerge();
+
+    void setupFavoritesMenu();
+
+    void addToFavorites();
+
+    void updateFavoritesMenu();
 
     void loadSettings();
 
@@ -106,5 +115,6 @@ private:
     QStringList pathHistory;
     int pathHistoryIndex;
     QString mergedContent;
+    QMenu* favoritesMenu;
 };
 #endif // MAINWINDOW_H
